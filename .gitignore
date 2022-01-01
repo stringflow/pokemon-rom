@@ -1,0 +1,4 @@
+build/*
+test/roms/*
+test/symbols/*
+project.4coder

@@ -62,7 +62,7 @@ DLLEXPORT int rom_gettrainerclassroster(ROM& rom, u8 trainerClassId, u8 rosterIn
 
 // Writes the trainer class' picture pointer and base money reward.
 DLLEXPORT void rom_gettrainerclasspicmoney(ROM& rom, u8 trainerClassId, PicMoney *dest) {
-    //NOTE(stringflow): The table is 5 bytes wide and an additional byte is allocated for                            the base money but never loaded. Because of this I chose to store                            the base money as a 16-bit integer and ignore the last byte.
+    // NOTE(stringflow): The table is 5 bytes wide and an additional byte is allocated for                            the base money but never loaded. Because of this I chose to store                            the base money as a 16-bit integer and ignore the last byte.
     int dataOffset = (trainerClassId - OPP_ID_OFFSET - 1) * (sizeof(PicMoney)+1);
     u16 *data = (u16 *) (rom["TrainerPicAndMoneyPointers"] + dataOffset);
     dest->picPointer = *data++;

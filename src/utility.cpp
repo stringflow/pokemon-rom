@@ -50,7 +50,11 @@ u8 reverseBits(u8 value) {
 }
 
 s8 toSigned4(u8 value) {
-    return (value & 7) * (value & 8 ? -1 : 1);
+    return (value & 0x07) * (value & 0x08 ? -1 : 1);
+}
+
+s8 toSigned8(u8 value) {
+    return (value & 0x7f) * (value & 0x80 ? -1 : 1);
 }
 
 int decodeBCD(u8 *data, int count) {

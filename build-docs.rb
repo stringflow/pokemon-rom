@@ -26,7 +26,7 @@ module Docs
     # remove (resulting) empty lines
     lines.filter_map do |line|
       line.strip!
-      line.empty? ? nil : line
+      line unless line.empty?
     end
   end
 
@@ -38,10 +38,12 @@ module Docs
 
   def format_description(lines)
     # remove comments' slashes and leading/trailing whitespace
+    # drop special comments and following lines
     # remove linebreaks when: no period -> not uppercase
     lines.map { |line| line[2..].strip }
-      .join("\n")
-      .gsub(/([^.])\n([^A-Z])/, '\1 \2')
+      .take_while { |line| line !~ /^[A-Z]+\(.+\):/ }
+      .join("  \n")
+      .gsub(/([^.])  \n([^A-Z])/, '\1 \2')
   end
 
   def build_markdown(exports)

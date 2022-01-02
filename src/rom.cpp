@@ -58,6 +58,7 @@ struct ROM {
 #include "text.cpp"
 #include "wlastmap.cpp"
 #pragma pack(push, 1)
+#include "growthrate.cpp"
 #include "type.cpp"
 #include "pokemon.cpp"
 #include "item.cpp"
@@ -134,7 +135,7 @@ Game parseGameTitle(u8 *rom) {
     else return None;
 }
 
-//TODO(stringflow): Implement error handling
+// TODO(stringflow): Implement error handling
 //                  ( 0) success
 //                  (-1) file does not exist
 //                  (-2) bad format

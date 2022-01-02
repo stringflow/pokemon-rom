@@ -83,6 +83,7 @@ void nameTest(const char *prefix, std::string name, u8 id, std::string expectedN
                  gotName);
 }
 
+#include "growthrate_tests.cpp"
 #include "type_tests.cpp"
 #include "pokemon_tests.cpp"
 #include "item_tests.cpp"
@@ -116,6 +117,7 @@ int main() {
         sprintf(symfile, "..\\test\\symbols\\poke%s.sym", gameName.c_str());
         ROM *romptr = rom_load(romfile, symfile);
         rom = *romptr;
+        growthrateTests();
         typeTests();
         pokemonTests();
         itemTests();

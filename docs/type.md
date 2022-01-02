@@ -1,7 +1,7 @@
 # type.cpp
 ### rom_geteffectiveness
 `(ROM& rom, u8 attackingTypeId, u8 defendingTypeId) -> f32`  
-Returns the damage multiplier for the type matchup. It returns the following values: 2.0 for super effective 1.0 for neutral 0.5 for not very effective 0.0 for immunity
+Returns the damage multiplier for the type matchup. It returns the following values: 2.0 for super effective 1.0 for neutral 0.5 for not very effective 0.0 for immunity  
 For duel-typing call this function twice with each of the defending types and multiply the results.
 ### rom_gettypename
 `(ROM& rom, u8 typeId, char *dest) -> void`  

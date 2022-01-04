@@ -45,7 +45,11 @@ DLLEXPORT bool rom_istilepaircollision(ROM& rom, u8 tilesetId, u8 tile1, u8 tile
 }
 
 // Returns if moving from the player tile to the ledge tile with the input will result
-// in a ledge hop.
+// in a ledge hop. The input is expected to be the joypad value.
+//   $10 for right.
+//   $20 for left.
+//   $40 for up.
+//   $80 for down.
 DLLEXPORT bool rom_isledgehop(ROM& rom, u8 tilesetId, u8 playerTile, u8 ledgeTile,
                               u8 input) {
     if(tilesetId != 0) return false;

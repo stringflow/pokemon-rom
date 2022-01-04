@@ -17,16 +17,16 @@ DLLEXPORT void rom_gettypename(ROM& rom, u8 typeId, char *dest) {
     strcpy(dest, name.c_str());
 }
 
-// Returns whether the type counts as a special type or a physical type.
+// Returns whether the type is a special type or a physical type.
 DLLEXPORT bool rom_istypespecial(u8 typeId) {
     return typeId > 0x13;
 }
 
 // Returns the damage multiplier for the type matchup. It returns the following values:
-//   2.0 for super effective
-//   1.0 for neutral
-//   0.5 for not very effective
-//   0.0 for immunity
+//   2.0 for super effective.
+//   1.0 for neutral.
+//   0.5 for not very effective.
+//   0.0 for immunity.
 // For duel-typing call this function twice with each of the defending types 
 // and multiply the results.
 DLLEXPORT f32 rom_geteffectiveness(ROM& rom, u8 attackingTypeId, u8 defendingTypeId) {

@@ -8,7 +8,11 @@ Returns if the tile is a door tile.
 Used to tell the game when to automatically path the player one tile down.
 ### rom_isledgehop
 `(ROM& rom, u8 tilesetId, u8 playerTile, u8 ledgeTile, u8 input) -> bool`  
-Returns if moving from the player tile to the ledge tile with the input will result in a ledge hop.
+Returns if moving from the player tile to the ledge tile with the input will result in a ledge hop. The input is expected to be the joypad value.  
+$10 for right.  
+$20 for left.  
+$40 for up.  
+$80 for down.
 ### rom_isshoretile
 `(u8 tile) -> bool`  
 Returns if the tile is a shore tile.

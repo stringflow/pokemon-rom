@@ -30,11 +30,11 @@ DLLEXPORT bool rom_istypespecial(u8 typeId) {
 // For duel-typing call this function twice with each of the defending types 
 // and multiply the results.
 DLLEXPORT f32 rom_geteffectiveness(ROM& rom, u8 attackingTypeId, u8 defendingTypeId) {
-    TypeEffectiveness matchup;
-    TypeEffectiveness *data = (TypeEffectiveness *) rom["TypeEffects"];
-    while((matchup = *data++).attacking != 0xff) {
-        if(matchup.attacking == attackingTypeId && matchup.defending == defendingTypeId) {
-            return (f32) matchup.effectiveness / 10.0f;
+    for(TypeEffectiveness *matchup = (TypeEffectiveness *) rom["TypeEffects"];
+        matchup->attacking != 0xff;
+        matchup++) {
+        if(matchup->attacking == attackingTypeId && matchup->defending == defendingTypeId) {
+            return (f32) matchup->effectiveness / 10.0f;
         }
     }
     return 1.0f;

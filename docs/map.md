@@ -35,6 +35,9 @@ Writes the 2bpp representation of the map tiles to the destination buffer.
 The size of the buffer should be: mapwidth (in blocks) * mapheight (in blocks) * 256.  
 Returns the map size in pixels.  
 If you do not know the map dimensions, pass zero as the destination and use the return value to tell you how big the buffer should be.
+### rom_getmaptile
+`(ROM& rom, u8 mapId, int x, int y) -> u8`  
+Returns the bottom left tile of at the given X and Y coordinate. If out of bounds coordinates are passed, the border block will be used.
 ### rom_getmaptiles
 `(ROM& rom, u8 mapId, u8 *dest) -> int`  
 Writes the tiles making up the map to the destination buffer. The size of the buffer should be the: mapwidth (in blocks) * mapheight (in blocks) * 16.  

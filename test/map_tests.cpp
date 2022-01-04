@@ -132,6 +132,44 @@ void candig(std::string name, u8 mapId, bool expectedDig) {
          formatValue(rom_candig(rom, mapId)));
 }
 
+void landcollision(std::string name, u8 mapId, u8 xSrc, u8 ySrc, u8 xDest, u8 yDest,  bool expectedCollision) {
+    TEST(name + "-" + 
+         std::to_string(xSrc) + "," + std::to_string(ySrc) + "->" +
+         std::to_string(xDest) + "," + std::to_string(yDest),
+         formatValue(expectedCollision),
+         formatValue(rom_canmove(rom, mapId, xSrc, ySrc, xDest, yDest, false)));
+}
+
+void watercollision(std::string name, u8 mapId, u8 xSrc, u8 ySrc, u8 xDest, u8 yDest,  bool expectedCollision) {
+    TEST(name + "-" + 
+         std::to_string(xSrc) + "," + std::to_string(ySrc) + "->" +
+         std::to_string(xDest) + "," + std::to_string(yDest),
+         formatValue(expectedCollision),
+         formatValue(rom_canmove(rom, mapId, xSrc, ySrc, xDest, yDest, true)));
+}
+
+void warp(std::string name, u8 mapId, u8 x, u8 y, bool expectedWarp, u8 expectedWarpDirection) {
+    bool gotWarp;
+    u8 gotWarpDirection;
+    rom_warpcheck(rom, mapId, x, y, &gotWarp, &gotWarpDirection);
+    
+    std::string testName = name + "-" + std::to_string(x) + "," + std::to_string(y);
+    TEST(testName,
+         formatValue(expectedWarp),
+         formatValue(gotWarp));
+    TEST(testName + "-direction",
+         formatValue(expectedWarpDirection),
+         formatValue(gotWarpDirection));
+}
+
+void ledgehop(std::string name, u8 mapId, u8 xSrc, u8 ySrc, u8 xDest, u8 yDest,  bool expectedHop) {
+    TEST(name + "-" + 
+         std::to_string(xSrc) + "," + std::to_string(ySrc) + "->" +
+         std::to_string(xDest) + "," + std::to_string(yDest),
+         formatValue(expectedHop),
+         formatValue(rom_ledgehopcheck(rom, mapId, xSrc, ySrc, xDest, yDest)));
+}
+
 void mapTests() {
     map("pallettown", 0, 
         0x642a1, 
@@ -202,4 +240,29 @@ void mapTests() {
     candig("pallettown", 0, false);
     candig("viridianforest", 51, true);
     candig("billshouse", 88, rom.game == Yellow ? false : true);
+    
+    landcollision("mtmoonb2f", 61, 20, 17, 20, 16, false);
+    landcollision("mtmoonb2f", 61, 20, 17, 21, 17, false);
+    landcollision("mtmoonb2f", 61, 20, 17, 19, 17, true);
+    landcollision("mtmoonb2f", 61, 28, 12, 28, 11, true);
+    landcollision("mtmoonb2f", 61, 28, 11, 28, 12, true);
+    
+    watercollision("cinnabar", 8, 1, 0, 2, 0, false);
+    watercollision("cinnabar", 8, 1, 0, 0, 0, true);
+    watercollision("cinnabar", 8, 3, 4, 4, 4, false);
+    watercollision("cinnabar", 8, 1, 0, 0, 0, true);
+    
+    warp("ssanne", 95, 2, 6, true, 0);
+    warp("ssanne", 95, 3, 6, false, 0);
+    warp("ssanne", 95, 26, 0, true, 0x40);
+    warp("ssanne", 95, 27, 0, true, 0x40);
+    warp("redshouse1f", 37, 7, 1, true, 0x00);
+    warp("redshouse1f", 37, 2, 7, true, 0x80);
+    warp("redshouse1f", 37, 3, 7, true, 0x80);
+    
+    ledgehop("route1", 12, 4, 4, 4, 5, true);
+    ledgehop("route1", 12, 10, 26, 10, 27, true);
+    ledgehop("route1", 12, 9, 18, 9, 19, false);
+    ledgehop("route4", 15, 44, 8, 45, 8, true);
+    ledgehop("route4", 15, 51, 8, 50, 8, true);
 }

@@ -66,6 +66,7 @@ struct ROM {
 #include "move.cpp"
 #include "tileset.cpp"
 #include "map.cpp"
+#include "collision.cpp"
 #pragma pack(pop)
 
 constexpr int BANK_SIZE = 0x4000;

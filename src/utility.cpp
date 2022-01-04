@@ -11,11 +11,15 @@ int findByte(u8 *data, u8 value, int stepSize = 1) {
     return count;
 }
 
-bool inList(u8 *data, u8 value, u8 listTerminator, int stepSize = 1) {
-    for(int i = 0; data[i] != listTerminator; i += stepSize) {
-        if(data[i] == value) return true;
+int findByteTerminated(u8 *data, u8 value, u8 listTerminator, int stepSize = 1) {
+    for(int i = 0; data[i * stepSize] != listTerminator; i++) {
+        if(data[i * stepSize] == value) return i;
     }
-    return false;
+    return -1;
+}
+
+bool inList(u8 *data, u8 value, u8 listTerminator, int stepSize = 1) {
+    return findByteTerminated(data, value, listTerminator, stepSize) != -1;
 }
 
 u8 nybbleArray(u8 *arrayStart, u8 index) {

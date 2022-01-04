@@ -266,6 +266,29 @@ DLLEXPORT void rom_getmapobjectpixels(ROM& rom, u8 pictureId, u8 direction, u8 *
     rom_getspritepixels(rom, pictureId, index, flip, dest);
 }
 
+// Returns the bottom left tile of at the given X and Y coordinate. If out of bounds
+// coordinates are passed, the border block will be used.
+DLLEXPORT u8 rom_getmaptile(ROM& rom, u8 mapId, int x, int y) {
+    Map map;
+    rom_getmap(rom, mapId, &map);
+    
+    Tileset tileset;
+    rom_gettileset(rom, map.header.tileset, &tileset);
+    
+    u8 block;
+    if(x < 0 || y < 0 || x >= map.header.width * 2 || y >= map.header.height * 2) {
+        block = map.borderBlock;
+    } else {
+        int blockIndex = x / 2 + y / 2 * map.header.width;
+        block = *rom[map.header.bank << 16 | map.header.blockPointer + blockIndex];
+    }
+    
+    int xBlock = x & 1;
+    int yBlock = y & 1;
+    int tileIndex = xBlock * 2 + yBlock * 8 + 4;
+    return *rom[tileset.bank << 16 | tileset.blockPointer + block * 16 + tileIndex];
+}
+
 // Returns the actual destination map that a wLastMap using warp brings you to.
 DLLEXPORT u8 rom_getlastmap(ROM& rom, u8 mapId, u8 warpIndex) {
     u16 key = mapId << 8 | warpIndex;

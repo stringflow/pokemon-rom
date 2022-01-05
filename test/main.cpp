@@ -99,33 +99,34 @@ int main() {
         Yellow,
     };
     
+    ROM *romptr = rom_create();
     clock_t start = clock();
     for(int i = 0; i < ARRAY_LENGTH(games); i++) {
         int game = games[i];
+        
         std::string gameName = "";
         switch(game) {
             case Red: gameName = "red"; break;
             case Blue: gameName = "blue"; break;
             case Yellow: gameName = "yellow"; break;
         };
-        
         globalTestPrefix = gameName + "-";
         
         char romfile[256];
         char symfile[256];
         sprintf(romfile, "..\\test\\roms\\poke%s.gbc", gameName.c_str());
         sprintf(symfile, "..\\test\\symbols\\poke%s.sym", gameName.c_str());
-        ROM *romptr = rom_load(romfile, symfile);
-        rom = *romptr;
-        growthrateTests();
-        typeTests();
-        pokemonTests();
-        itemTests();
-        trainerclassTests();
-        moveTests();
-        mapTests();
-        tilesetTests();
-        rom_free(romptr);
+        if(rom_load(*romptr, romfile, symfile) == Ok) {
+            rom = *romptr;
+            growthrateTests();
+            typeTests();
+            pokemonTests();
+            itemTests();
+            trainerclassTests();
+            moveTests();
+            mapTests();
+            tilesetTests();
+        }
     }
     
     clock_t end = clock();
@@ -135,5 +136,6 @@ int main() {
     printf("%d tests run in %f seconds.\n", numPassed + numFailed, elapsed);
     printf("%d FAILED (%d tests passed)\n", numFailed, numPassed);
     
+    rom_free(romptr);
     return 0;
 }

@@ -186,7 +186,7 @@ DLLEXPORT int rom_getmaptiles(ROM& rom, u8 mapId, u8 *dest) {
 
 // Converts a tile array into an array of 2bpp pixels. The size of the destination buffer
 // should be: tileCount * 16.
-DLLEXPORT void rom_tilestopixels(ROM& rom, u8 *tiles, int tileCount, u8 width, int gfxPointer, u8 *dest) {
+DLLEXPORT void rom_tilestopixels(ROM& rom, u8 *tiles, int tileCount, int gfxPointer, u8 *dest) {
     for(int i = 0; i < tileCount; i++) {
         memcpy(dest + i * 16, rom[gfxPointer + tiles[i] * 16], 16);
     }
@@ -210,7 +210,6 @@ DLLEXPORT int rom_getmappixels(ROM& rom, u8 mapId, u8 *dest) {
         rom_tilestopixels(rom,
                           tiles,
                           mapSize,
-                          map.width,
                           tileset.bank << 16 | tileset.gfxPointer,
                           dest);
     }

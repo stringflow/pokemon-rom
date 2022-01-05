@@ -54,5 +54,5 @@ Writes the pictureId's 2bpp representation to a 64 size buffer.
 Different versions of the sprite can be indexed through the index parameter, for typical overworld sprites the versions would be: (0) facing down (1) facing up (2) facing left  
 The sprite will be vertically flipped if the flag is set, making sprites that are facing right possible.
 ### rom_tilestopixels
-`(ROM& rom, u8 *tiles, int tileCount, u8 width, int gfxPointer, u8 *dest) -> void`  
+`(ROM& rom, u8 *tiles, int tileCount, int gfxPointer, u8 *dest) -> void`  
 Converts a tile array into an array of 2bpp pixels. The size of the destination buffer should be: tileCount * 16.

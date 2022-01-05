@@ -16,6 +16,6 @@ DLLEXPORT int rom_calcxp(ROM& rom, u8 growthRateId, int level) {
 }
 
 // Returns the relative xp needed for the next level.
-DLLEXPORT int rom_calcxptolevelup(ROM& rom, u8 growthRate, int level) {
-    return rom_calcxp(rom, growthRate, level + 1) - rom_calcxp(rom, growthRate, level);
+DLLEXPORT int rom_calcxptolevelup(ROM& rom, u8 growthRateId, int level) {
+    return rom_calcxp(rom, growthRateId, level + 1) - rom_calcxp(rom, growthRateId, level);
 }

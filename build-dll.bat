@@ -1,5 +1,5 @@
 @echo off
 if not exist build mkdir build
 pushd build
-clang++ -fdiagnostics-absolute-paths -shared ..\src\rom.cpp -o rom.dll
+clang++ -o2 -fdiagnostics-absolute-paths -Wall -Wno-switch -shared ..\src\rom.cpp -o rom.dll
 popd

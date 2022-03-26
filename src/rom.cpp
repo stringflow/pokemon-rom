@@ -22,20 +22,20 @@ typedef double f64;
 #define DLLEXPORT extern "C" __declspec(dllexport)
 
 enum Game {
-    None,
-    Red,
-    Blue,
-    Yellow,
-    Gold,
-    Silver,
-    Crystal
+    NONE,
+    RED,
+    BLUE,
+    YELLOW,
+    GOLD,
+    SILVER,
+    CRYSTAL
 };
 
 enum RomLoadResult {
-    Ok,
-    IOError,
-    BadFormat,
-    UnsupportedGame
+    OK,
+    IO_ERROR,
+    BAD_FORMAT,
+    UNSUPPORTED_GAME
 };
 
 struct ROM {
@@ -73,11 +73,11 @@ constexpr int BANK_SIZE = 0x4000;
 constexpr int NUM_PADDED_BANKS = 0x100;
 constexpr int ROM_SIZE = BANK_SIZE * 4 * NUM_PADDED_BANKS;
 
-void padROM(u8 *dest, u8 *src, int numBanks) {
+void pad_rom(u8 *dest, u8 *src, int num_banks) {
     for(int bank = 0; bank < NUM_PADDED_BANKS; bank++) {
         memcpy(dest, src, BANK_SIZE); // home
         dest += BANK_SIZE;
-        memcpy(dest, src + (bank % numBanks) * BANK_SIZE, BANK_SIZE); // bank n
+        memcpy(dest, src + (bank % num_banks) * BANK_SIZE, BANK_SIZE); // bank n
         dest += BANK_SIZE;
         memset(dest, 0xff, BANK_SIZE); // vram/sram
         dest += BANK_SIZE;
@@ -86,26 +86,26 @@ void padROM(u8 *dest, u8 *src, int numBanks) {
     }
 }
 
-RomLoadResult readROMFile(u8 *rom, const char *filename) {
+RomLoadResult read_rom_file(u8 *rom, const char *filename) {
     FILE *file = fopen(filename, "rb");
-    if(!file) return IOError;
+    if(!file) return IO_ERROR;
     
     fseek(file, 0, SEEK_END);
-    int fileSize = ftell(file);
+    int file_size = ftell(file);
     fseek(file, 0, SEEK_SET);
-    u8 *fileContents = new u8[fileSize];
-    fread(fileContents, fileSize, 1, file);
+    u8 *file_contents = new u8[file_size];
+    fread(file_contents, 1, file_size, file);
     fclose(file);
     
-    padROM(rom, fileContents, fileSize / BANK_SIZE);
-    delete[] fileContents;
+    pad_rom(rom, file_contents, file_size / BANK_SIZE);
+    delete[] file_contents;
     
-    return Ok;
+    return OK;
 }
 
-RomLoadResult readSymbolsFile(std::map<std::string, int> *symbols, const char *filename) {
+RomLoadResult read_symbols_file(std::map<std::string, int> *symbols, const char *filename) {
     FILE *file = fopen(filename, "r");
-    if(!file) return IOError;
+    if(!file) return IO_ERROR;
     
     symbols->clear();
     
@@ -121,27 +121,27 @@ RomLoadResult readSymbolsFile(std::map<std::string, int> *symbols, const char *f
         if(sscanf(line, "%02x:%04x %s", &bank, &addr, label) == 3) {
             symbols->insert(std::make_pair(std::string(label), bank << 16 | addr));
         } else {
-            return BadFormat;
+            return BAD_FORMAT;
         }
     }
     
-    return Ok;
+    return OK;
 }
 
-RomLoadResult parseGameTitle(Game *game, u8 *rom) {
+RomLoadResult parse_game_title(Game *game, u8 *rom) {
     char title[0x11];
     memcpy(title, rom + 0x134, 0x10);
     title[title[0xf] & 0x80 ? 0xf : 0x10] = '\0';
     
-    if(strcmp(title, "POKEMON RED") == 0) *game = Red;
-    else if(strcmp(title, "POKEMON BLUE") == 0) *game = Blue;
-    else if(strcmp(title, "POKEMON YELLOW") == 0) *game = Yellow;
-    else if(strcmp(title, "POKEMON GOLD") == 0) *game = Gold;
-    else if(strcmp(title, "POKEMON SILVER") == 0) *game = Silver;
-    else if(strcmp(title, "POKEMON CRYSTAL") == 0) *game = Crystal;
-    else return UnsupportedGame;
+    if(strcmp(title, "POKEMON RED") == 0) *game = RED;
+    else if(strcmp(title, "POKEMON BLUE") == 0) *game = BLUE;
+    else if(strcmp(title, "POKEMON YELLOW") == 0) *game = YELLOW;
+    else if(strcmp(title, "POKEMON GOLD") == 0) *game = GOLD;
+    else if(strcmp(title, "POKEMON SILVER") == 0) *game = SILVER;
+    else if(strcmp(title, "POKEMON CRYSTAL") == 0) *game = CRYSTAL;
+    else return UNSUPPORTED_GAME;
     
-    return Ok;
+    return OK;
 }
 
 // Creates a ROM reference.
@@ -149,17 +149,17 @@ DLLEXPORT ROM* rom_create() {
     ROM *rom = new ROM();
     rom->contents = new u8[ROM_SIZE];
     rom->symbols = std::map<std::string, int>();
-    rom->game = None;
+    rom->game = NONE;
     return rom;
 }
 
 // Loads the ROM image and processes the symbols file. Returns 0 on success, a positive
 // number on error.
 DLLEXPORT RomLoadResult rom_load(ROM& rom, const char *romfile, const char *symbolsfile) {
-    RomLoadResult result = Ok;
-    if((result = readROMFile(rom.contents, romfile)) != Ok) return result;
-    if((result = readSymbolsFile(&rom.symbols, symbolsfile)) != Ok) return result;
-    if((result = parseGameTitle(&rom.game, rom.contents)) != Ok) return result;
+    RomLoadResult result = OK;
+    if((result = read_rom_file(rom.contents, romfile)) != OK) return result;
+    if((result = read_symbols_file(&rom.symbols, symbolsfile)) != OK) return result;
+    if((result = parse_game_title(&rom.game, rom.contents)) != OK) return result;
     return result;
 }
 

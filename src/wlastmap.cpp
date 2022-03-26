@@ -1,5 +1,5 @@
 // NOTE(stringflow): keys are (mapId << 8 | warpIndex)
-static std::map<u16, u8> rbLastMapDestinations = {
+static std::map<u16, u8> rb_last_map_destinations = {
     { 0x2e01, 0x0d },
     { 0x5402, 0x16 },
     { 0x2e00, 0x0d },
@@ -255,7 +255,7 @@ static std::map<u16, u8> rbLastMapDestinations = {
     { 0xb600, 0x0a },
 };
 
-static std::map<u16, u8> yLastMapDestinations = {
+static std::map<u16, u8> yellow_last_map_destinations = {
     { 0x2e01, 0x0d },
     { 0x5402, 0x16 },
     { 0x2e00, 0x0d },

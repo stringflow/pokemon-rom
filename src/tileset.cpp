@@ -1,10 +1,10 @@
 struct Tileset {
     u8 bank;
-    u16 blockPointer;
-    u16 gfxPointer;
-    u16 collisionPointer;
-    u8 counterTiles[3];
-    u8 grassTile;
+    u16 block_pointer;
+    u16 gfx_pointer;
+    u16 collision_pointer;
+    u8 counter_tiles[3];
+    u8 grass_tile;
     u8 animations;
 };
 
@@ -15,27 +15,27 @@ struct TilePairCollision {
 };
 
 struct Ledge {
-    u8 playerDirection;
-    u8 playerTile;
-    u8 ledgeTile;
-    u8 inputRequired;
+    u8 player_direction;
+    u8 player_tile;
+    u8 ledge_tile;
+    u8 input_required;
 };
 
 // Writes the tileset's header data.
-DLLEXPORT void rom_gettileset(ROM& rom, u8 tilesetId, Tileset *tileset) {
-    u8 *data = rom["Tilesets"] + tilesetId * sizeof(Tileset);
+DLLEXPORT void rom_gettileset(ROM& rom, u8 tileset_id, Tileset *tileset) {
+    u8 *data = rom["Tilesets"] + tileset_id * sizeof(Tileset);
     memcpy(tileset, data, sizeof(Tileset));
 }
 
 // Returns if moving from tile 1 to tile 2 results in a tile pair collision.
 // Used for simulate differences in elevation.
-DLLEXPORT bool rom_istilepaircollision(ROM& rom, u8 tilesetId, u8 tile1, u8 tile2,
+DLLEXPORT bool rom_istilepaircollision(ROM& rom, u8 tileset_id, u8 tile1, u8 tile2,
                                        bool water) {
     std::string label = water ? "TilePairCollisionsWater" : "TilePairCollisionsLand";
     for(TilePairCollision *pair = (TilePairCollision *) rom[label];
         pair->tileset != 0xff;
         pair++) {
-        if(pair->tileset == tilesetId && 
+        if(pair->tileset == tileset_id && 
            ((pair->tile1 == tile1 && pair->tile2 == tile2) ||
             (pair->tile1 == tile2 && pair->tile2 == tile1))) {
             return true;
@@ -50,14 +50,14 @@ DLLEXPORT bool rom_istilepaircollision(ROM& rom, u8 tilesetId, u8 tile1, u8 tile
 //   $20 for left.
 //   $40 for up.
 //   $80 for down.
-DLLEXPORT bool rom_isledgehop(ROM& rom, u8 tilesetId, u8 playerTile, u8 ledgeTile,
+DLLEXPORT bool rom_isledgehop(ROM& rom, u8 tileset_id, u8 player_tile, u8 ledge_tile,
                               u8 input) {
-    if(tilesetId != 0) return false;
+    if(tileset_id != 0) return false;
     
     for(Ledge *ledge = (Ledge *) rom["LedgeTiles"];
-        ledge->playerDirection != 0xff;
+        ledge->player_direction != 0xff;
         ledge++) {
-        if(ledge->playerTile == playerTile && ledge->ledgeTile == ledgeTile && ledge->inputRequired == input) {
+        if(ledge->player_tile == player_tile && ledge->ledge_tile == ledge_tile && ledge->input_required == input) {
             return true;
         }
     }
@@ -66,20 +66,20 @@ DLLEXPORT bool rom_isledgehop(ROM& rom, u8 tilesetId, u8 playerTile, u8 ledgeTil
 
 // Returns if the tile is a door tile. 
 // Used to tell the game when to automatically path the player one tile down.
-DLLEXPORT bool rom_isdoortile(ROM& rom, u8 tilesetId, u8 tile) {
-    u8 *doorPointers = rom["DoorTileIDPointers"];
-    int listIndex = findByteTerminated(doorPointers, tilesetId, 0xff, 3);
-    if(listIndex == -1) return false;
+DLLEXPORT bool rom_isdoortile(ROM& rom, u8 tileset_id, u8 tile) {
+    u8 *door_pointers = rom["DoorTileIDPointers"];
+    int list_index = find_byte_terminated(door_pointers, tileset_id, 0xff, 3);
+    if(list_index == -1) return false;
     
-    u16 address = *(u16 *) (doorPointers + listIndex * 3 + 1);
+    u16 address = *(u16 *) (door_pointers + list_index * 3 + 1);
     u8 *doors = rom[0x60000 | address];
-    return inList(doors, tile, 0x00);
+    return in_list(doors, tile, 0x00);
 }
 
 // Returns if the tile is a warp tile.
-DLLEXPORT bool rom_iswarptile(ROM& rom, u8 tilesetId, u8 tile) {
-    u8 *data = rom[0x30000 | ((u16 *) rom["WarpTileIDPointers"])[tilesetId]];
-    return inList(data, tile, 0xff);
+DLLEXPORT bool rom_iswarptile(ROM& rom, u8 tileset_id, u8 tile) {
+    u8 *data = rom[0x30000 | ((u16 *) rom["WarpTileIDPointers"])[tileset_id]];
+    return in_list(data, tile, 0xff);
 }
 
 // Returns if the tile is a shore tile.

@@ -11,95 +11,95 @@ constexpr u8 REVERSED_NYBBLES[16] = {
 
 struct StreamingBuffer {
     u8 *data;
-    u8 bitCount;
+    u8 bit_count;
 };
 
 struct DecompressionBuffer {
     u8 *bitplane;
-    u8 bitShift;
+    u8 bitshift;
     u8 x;
     u8 y;
-    u8 heightPx;
+    u8 height_px;
 };
 
-u8 readBit(StreamingBuffer *buffer) {
-    buffer->bitCount--;
-    u8 bit = (*buffer->data >> buffer->bitCount) & 1;
+u8 read_bit(StreamingBuffer *buffer) {
+    buffer->bit_count--;
+    u8 bit = (*buffer->data >> buffer->bit_count) & 1;
     
-    if(buffer->bitCount == 0) {
-        buffer->bitCount = 8;
+    if(buffer->bit_count == 0) {
+        buffer->bit_count = 8;
         buffer->data++;
     }
     
     return bit;
 }
 
-u8 readBits(StreamingBuffer *buffer, u8 bitCount) {
+u8 read_bits(StreamingBuffer *buffer, u8 bit_count) {
     u8 result = 0;
-    for(int i = 0; i < bitCount; i++) {
-        result = result << 1 | readBit(buffer);
+    for(int i = 0; i < bit_count; i++) {
+        result = result << 1 | read_bit(buffer);
     }
     return result;
 }
 
-void writePair(DecompressionBuffer *buffer, u8 bitpair) {
-    int offset = buffer->x / 8 * buffer->heightPx + buffer->y;
-    buffer->bitplane[offset] |= bitpair << (6 - buffer->bitShift);
+void write_pair(DecompressionBuffer *buffer, u8 bitpair) {
+    int offset = buffer->x / 8 * buffer->height_px + buffer->y;
+    buffer->bitplane[offset] |= bitpair << (6 - buffer->bitshift);
     
     buffer->y++;
-    if(buffer->y >= buffer->heightPx) {
+    if(buffer->y >= buffer->height_px) {
         buffer->y = 0;
         buffer->x += 2;
     }
-    buffer->bitShift = buffer-> x & 7;
+    buffer->bitshift = buffer-> x & 7;
 }
 
-void decompressBitplane(DecompressionBuffer *out, StreamingBuffer *in, u8 *bitplane,
-                        int width, int height) {
+void decompress_bitplane(DecompressionBuffer *out, StreamingBuffer *in, u8 *bitplane,
+                         int width, int height) {
     int size = width * height * 32;
     
     out->bitplane = bitplane;
-    out->bitShift = 0;
+    out->bitshift = 0;
     out->x = 0;
     out->y = 0;
     
     int written = 0;
-    bool dataPacket = readBit(in);
+    bool data_packet = read_bit(in);
     while(written < size) {
-        if(dataPacket) {
+        if(data_packet) {
             // NOTE(stringflow): DATA packet
             while(written < size) {
-                u8 bitpair = readBits(in, 2);
+                u8 bitpair = read_bits(in, 2);
                 if(bitpair == 0) break;
-                writePair(out, bitpair);
+                write_pair(out, bitpair);
                 written++;
             }
         } else {
             // NOTE(stringflow): RLE packet
-            int lengthBits = 0;
+            int length_bits = 0;
             int length = 0;
             do {
-                lengthBits = lengthBits << 1 | readBit(in);
+                length_bits = length_bits << 1 | read_bit(in);
                 length++;
-            } while(lengthBits & 1);
+            } while(length_bits & 1);
             
             int value = 0;
             for(int i = 0; i < length; i++) {
-                value = value << 1 | readBit(in);
+                value = value << 1 | read_bit(in);
             }
             
-            int total = lengthBits + 1 + value;
+            int total = length_bits + 1 + value;
             for(int i = 0; i < total; i++) {
-                writePair(out, 0);
+                write_pair(out, 0);
                 written++;
             }
         }
         
-        dataPacket= !dataPacket;
+        data_packet = !data_packet;
     }
 }
 
-void differentialDecode(u8 *bitplane, u8 width, u8 height, bool flip) {
+void differential_decode(u8 *bitplane, u8 width, u8 height, bool flip) {
     int w = width * 8;
     int h = height * 8;
     for(int y = 0; y < h; y++) {
@@ -125,30 +125,30 @@ void differentialDecode(u8 *bitplane, u8 width, u8 height, bool flip) {
     }
 }
 
-void xorBitplanes(u8 *dest, u8 *src, u8 width, u8 height, bool flip) {
+void xor_bitplanes(u8 *dest, u8 *src, u8 width, u8 height, bool flip) {
     for(int i = 0; i < width * height * 8; i++) {
-        u8 srcByte = src[i];
-        u8 destByte = dest[i];
+        u8 src_byte = src[i];
+        u8 dest_byte = dest[i];
         if(flip) {
-            destByte = REVERSED_NYBBLES[destByte >> 4] << 4 | REVERSED_NYBBLES[destByte & 0xf];
+            dest_byte = REVERSED_NYBBLES[dest_byte >> 4] << 4 | REVERSED_NYBBLES[dest_byte & 0xf];
         }
-        dest[i] = srcByte ^ destByte;
+        dest[i] = src_byte ^ dest_byte;
     }
 }
 
-void padBuffer(u8 *dest, u8 *src, u8 boundingBox) {
+void pad_buffer(u8 *dest, u8 *src, u8 bounding_box) {
     memset(dest, 0, BYTES_PER_PLANE);
     
-    int w = boundingBox & 0xf;
-    int h = boundingBox >> 4;
-    u8 verticalOffset = BUFFER_H - h;
-    u8 horizontalOffset = (BUFFER_W + 1 - w) / 2;
-    u8 topleftOffset = 8 * (BUFFER_H * horizontalOffset + verticalOffset);
+    int w = bounding_box & 0xf;
+    int h = bounding_box >> 4;
+    u8 vertical_offset = BUFFER_H - h;
+    u8 horizontal_offset = (BUFFER_W + 1 - w) / 2;
+    u8 topleft_offset = 8 * (BUFFER_H * horizontal_offset + vertical_offset);
     
     if(h == 0) h = 0x20;
     
     u8 *readptr = src;
-    u8 *writeptr = dest + topleftOffset;
+    u8 *writeptr = dest + topleft_offset;
     int column = h * 8;
     for(int x = 0; x < w; x++) {
         memcpy(writeptr, readptr, column);
@@ -157,7 +157,7 @@ void padBuffer(u8 *dest, u8 *src, u8 boundingBox) {
     }
 }
 
-void scaleBuffer(u8 *dest, u8 *src) {
+void scale_buffer(u8 *dest, u8 *src) {
     u8 *readptr = src + (4*4*8) - 5;
     u8 *writeptr = dest + BYTES_PER_PLANE - 1;
     
@@ -168,33 +168,33 @@ void scaleBuffer(u8 *dest, u8 *src) {
         0xf0, 0xf3, 0xfc, 0xff };
     
     for(int column = 0; column < 4; column++) {
-        bool multipleColumns = column > 0;
-        int pitch = multipleColumns ? BUFFER_W*8-1 : -1;
+        bool multiple_columns = column > 0;
+        int pitch = multiple_columns ? BUFFER_W*8-1 : -1;
         for(int i = 0; i < 4*8-4; i++) {
             u8 pixel = *readptr--;
-            u8 upperNybble = table[pixel >> 4];
-            u8 lowerNybble = table[pixel & 0xf];
-            if(multipleColumns) {
-                *writeptr-- = lowerNybble;
-                *writeptr = lowerNybble;
+            u8 upper_nybble = table[pixel >> 4];
+            u8 lower_nybble = table[pixel & 0xf];
+            if(multiple_columns) {
+                *writeptr-- = lower_nybble;
+                *writeptr = lower_nybble;
                 writeptr -= pitch;
             }
-            *writeptr-- = upperNybble;
-            *writeptr = upperNybble;
+            *writeptr-- = upper_nybble;
+            *writeptr = upper_nybble;
             writeptr += pitch;
         }
         readptr -= 4;
-        if(multipleColumns) writeptr -= BUFFER_H*8;
+        if(multiple_columns) writeptr -= BUFFER_H*8;
     }
 }
 
-void zipperSprite(u8 *dest, u8 *bitplane0, u8 *bitplane1, bool flip) {
+void zipper_sprite(u8 *dest, u8 *bitplane0, u8 *bitplane1, bool flip) {
     for(int i = BYTES_PER_PLANE - 1; i >= 0; i--) {
         u8 plane0 = bitplane0[i];
         u8 plane1 = bitplane1[i];
         if(flip) {
-            plane0 = nybbleSwap(plane0);
-            plane1 = nybbleSwap(plane1);
+            plane0 = nybble_swap(plane0);
+            plane1 = nybble_swap(plane1);
         }
         dest[i * 2 + 0] = plane0;
         dest[i * 2 + 1] = plane1;
@@ -208,7 +208,7 @@ void zipperSprite(u8 *dest, u8 *bitplane0, u8 *bitplane1, bool flip) {
 //                  0xdc (?)
 //                  0xe3 (?)
 //                  0xe7 (?)
-void picDecompress(u8 *data, u8 boundingBox, u8 *dest, bool frontPic, bool flip, bool transpose = true) {
+void pic_decompress(u8 *data, u8 bounding_box, u8 *dest, bool front_pic, bool flip, bool transpose = true) {
     u8 *buffer = new u8[8192]();
     u8 *bufferA = buffer + 0 * BYTES_PER_PLANE;
     u8 *bufferB = buffer + 1 * BYTES_PER_PLANE;
@@ -217,44 +217,44 @@ void picDecompress(u8 *data, u8 boundingBox, u8 *dest, bool frontPic, bool flip,
     DecompressionBuffer out;
     StreamingBuffer in;
     in.data = data;
-    in.bitCount = 8;
+    in.bit_count = 8;
     
-    u8 width = readBits(&in, 4);
-    u8 height = readBits(&in, 4);
-    out.heightPx = height * 8;
+    u8 width = read_bits(&in, 4);
+    u8 height = read_bits(&in, 4);
+    out.height_px = height * 8;
     
-    u8 bitplaneOrder = readBit(&in);
-    u8 *bitplane1 = bitplaneOrder ? bufferC : bufferB;
-    u8 *bitplane2 = bitplaneOrder ? bufferB : bufferC;
+    u8 bitplane_order = read_bit(&in);
+    u8 *bitplane1 = bitplane_order ? bufferC : bufferB;
+    u8 *bitplane2 = bitplane_order ? bufferB : bufferC;
     
-    decompressBitplane(&out, &in, bitplane1, width, height);
+    decompress_bitplane(&out, &in, bitplane1, width, height);
     
-    u8 mode = readBit(&in);
-    if(mode == 1) mode = readBit(&in) + 1;
+    u8 mode = read_bit(&in);
+    if(mode == 1) mode = read_bit(&in) + 1;
     
-    decompressBitplane(&out, &in, bitplane2, width, height);
+    decompress_bitplane(&out, &in, bitplane2, width, height);
     
     if(mode == 0) {
-        differentialDecode(bitplane2, width, height, flip);
-        differentialDecode(bitplane1, width, height, flip);
+        differential_decode(bitplane2, width, height, flip);
+        differential_decode(bitplane1, width, height, flip);
     } else if(mode == 1) {
-        differentialDecode(bitplane1, width, height, flip);
-        xorBitplanes(bitplane2, bitplane1, width, height, flip);
+        differential_decode(bitplane1, width, height, flip);
+        xor_bitplanes(bitplane2, bitplane1, width, height, flip);
     } else if(mode == 2) {
-        differentialDecode(bitplane2, width, height, flip);
-        differentialDecode(bitplane1, width, height, flip);
-        xorBitplanes(bitplane2, bitplane1, width, height, false);
+        differential_decode(bitplane2, width, height, flip);
+        differential_decode(bitplane1, width, height, flip);
+        xor_bitplanes(bitplane2, bitplane1, width, height, false);
     }
     
-    if(frontPic) {
-        padBuffer(bufferA, bufferB, boundingBox);
-        padBuffer(bufferB, bufferC, boundingBox);
+    if(front_pic) {
+        pad_buffer(bufferA, bufferB, bounding_box);
+        pad_buffer(bufferB, bufferC, bounding_box);
     } else {
-        scaleBuffer(bufferA, bufferB);
-        scaleBuffer(bufferB, bufferC);
+        scale_buffer(bufferA, bufferB);
+        scale_buffer(bufferB, bufferC);
     }
     
-    zipperSprite(bufferB, bufferA, bufferB, flip);
+    zipper_sprite(bufferB, bufferA, bufferB, flip);
     
     if(flip) {
         u8 temp[BUFFER_W * 16];
@@ -271,8 +271,8 @@ void picDecompress(u8 *data, u8 boundingBox, u8 *dest, bool frontPic, bool flip,
         for(int tile = 0; tile < BUFFER_W * BUFFER_H; tile++) {
             u8 x = tile % BUFFER_W;
             u8 y = tile / BUFFER_H;
-            int newTile = x * BUFFER_W + y;
-            memcpy(dest + newTile * 16, bufferB + tile * 16, 16);
+            int new_tile = x * BUFFER_W + y;
+            memcpy(dest + new_tile * 16, bufferB + tile * 16, 16);
         }
     } else {
         memcpy(dest, bufferB, BYTES_PER_PLANE * 2);

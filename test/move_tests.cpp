@@ -1,45 +1,45 @@
-void moveheader(std::string name, u8 moveId, int expectedDataPointer) {
+void moveheader(std::string name, u8 move_id, int expected_data_pointer) {
     Move move;
-    rom_getmove(rom, moveId, &move);
+    rom_getmove(rom, move_id, &move);
     TEST(name, 
-         formatBytes(rom[expectedDataPointer], sizeof(Move)),
-         formatBytes(&move, sizeof(Move)));
+         format_bytes(rom[expected_data_pointer], sizeof(Move)),
+         format_bytes(&move, sizeof(Move)));
 }
 
-void moverawname(std::string name, u8 moveId, int expectedDataPointer) {
-    rawnameTest(__FUNCTION__, name, moveId, expectedDataPointer, rom_getmoverawname);
+void moverawname(std::string name, u8 move_id, int expected_data_pointer) {
+    rawname_test(__FUNCTION__, name, move_id, expected_data_pointer, rom_getmoverawname);
 }
 
-void moverawname(std::string name, u8 moveId) {
-    rawnameTest(__FUNCTION__, name, moveId, rom_getmoverawname, rom_getmovename);
+void moverawname(std::string name, u8 move_id) {
+    rawname_test(__FUNCTION__, name, move_id, rom_getmoverawname, rom_getmovename);
 }
 
-void movename(std::string name, u8 moveId, std::string expectedName) {
-    nameTest(__FUNCTION__, name, moveId, expectedName, rom_getmovename);
+void movename(std::string name, u8 move_id, std::string expected_name) {
+    name_test(__FUNCTION__, name, move_id, expected_name, rom_getmovename);
 }
 
-void movetm(std::string name, u8 tm, u8 expectedMove) {
-    u8 gotMove1 = rom_gettmmove(rom, tm);
-    u8 gotMove2 = rom_gettmmove(rom, tm + TM01 - 1);
+void movetm(std::string name, u8 tm, u8 expected_move) {
+    u8 got_move1 = rom_gettmmove(rom, tm);
+    u8 got_move2 = rom_gettmmove(rom, tm + TM01 - 1);
     TEST(name, 
-         formatValue(expectedMove << 8 | expectedMove), formatValue(gotMove1 << 8 | gotMove2));
+         format_value(expected_move << 8 | expected_move), format_value(got_move1 << 8 | got_move2));
 }
 
-void movehm(std::string name, u8 hm, u8 expectedMove) {
-    u8 gotMove1 = rom_gethmmove(rom, hm);
-    u8 gotMove2 = rom_gethmmove(rom, hm + HM01 - 1);
+void movehm(std::string name, u8 hm, u8 expected_move) {
+    u8 got_move1 = rom_gethmmove(rom, hm);
+    u8 got_move2 = rom_gethmmove(rom, hm + HM01 - 1);
     TEST(name, 
-         formatValue(expectedMove << 8 | expectedMove), formatValue(gotMove1 << 8 | gotMove2));
+         format_value(expected_move << 8 | expected_move), format_value(got_move1 << 8 | got_move2));
 }
 
-void movehighcrit(std::string name, u8 move, bool expectedHighCrit) {
-    bool gotHighCrit = rom_ismovehighcrit(rom, move);
+void movehighcrit(std::string name, u8 move, bool expected_high_crit) {
+    bool got_high_crit = rom_ismovehighcrit(rom, move);
     TEST(name,  
-         formatValue(expectedHighCrit), 
-         formatValue(gotHighCrit));
+         format_value(expected_high_crit), 
+         format_value(got_high_crit));
 }
 
-void moveTests() {
+void move_tests() {
     moveheader("pound", 0x01, 0xe4000);
     moveheader("karatechop", 0x02, 0xe4006);
     moveheader("struggle", 0xa5, 0xe43d8);
@@ -50,9 +50,9 @@ void moveTests() {
     moveheader("tm01", 0xc9, 0xe44b0);
     moveheader("tm55", 0xff, 0xe45f4);
     
-    moverawname("pound", 0x01,      rom.game == Yellow ? 0x2f4000 : 0x2c4000);
-    moverawname("karatechop", 0x02, rom.game == Yellow ? 0x2f4006 : 0x2c4006);
-    moverawname("struggle", 0xa5,   rom.game == Yellow ? 0x2f4606 : 0x2c4606);
+    moverawname("pound", 0x01,      rom.game == YELLOW ? 0x2f4000 : 0x2c4000);
+    moverawname("karatechop", 0x02, rom.game == YELLOW ? 0x2f4006 : 0x2c4006);
+    moverawname("struggle", 0xa5,   rom.game == YELLOW ? 0x2f4606 : 0x2c4606);
     moverawname("hm01", 0xc4);
     moverawname("hm05", 0xc8);
     moverawname("tm01", 0xc9);

@@ -1,52 +1,52 @@
-void itemrawname(std::string name, u8 itemId, int expectedDataPointer) {
-    rawnameTest(__FUNCTION__, name, itemId, expectedDataPointer, rom_getitemrawname);
+void itemrawname(std::string name, u8 item_id, int expected_data_pointer) {
+    rawname_test(__FUNCTION__, name, item_id, expected_data_pointer, rom_getitemrawname);
 }
 
-void itemrawname(std::string name, u8 itemId) {
-    rawnameTest(__FUNCTION__, name, itemId, rom_getitemrawname, rom_getitemname);
+void itemrawname(std::string name, u8 item_id) {
+    rawname_test(__FUNCTION__, name, item_id, rom_getitemrawname, rom_getitemname);
 }
 
-void itemname(std::string name, u8 itemId, std::string expectedName) {
-    nameTest(__FUNCTION__, name, itemId, expectedName, rom_getitemname);
+void itemname(std::string name, u8 item_id, std::string expected_name) {
+    name_test(__FUNCTION__, name, item_id, expected_name, rom_getitemname);
 }
 
-void itempointer(std::string name, u8 itemId, u16 expectedPointer) {
-    u16 gotPointer = rom_getitemexecutionpointer(rom, itemId);
+void itempointer(std::string name, u8 item_id, u16 expected_pointer) {
+    u16 got_pointer = rom_getitemexecutionpointer(rom, item_id);
     TEST(name,
-         formatValue(expectedPointer),
-         formatValue(gotPointer));
+         format_value(expected_pointer),
+         format_value(got_pointer));
 }
 
-void itempointer(std::string name, u8 itemId, std::string expectedPointerName) {
-    itempointer(name, itemId, (u16) rom.symbols[expectedPointerName]);
+void itempointer(std::string name, u8 item_id, std::string expected_pointer_name) {
+    itempointer(name, item_id, (u16) rom.symbols[expected_pointer_name]);
 }
 
-void keyitem(std::string name, u8 itemId, bool expectedKeyItem) {
+void keyitem(std::string name, u8 item_id, bool expected_key_item) {
     TEST(name,
-         formatValue(expectedKeyItem),
-         formatValue(rom_iskeyitem(rom, itemId)));
+         format_value(expected_key_item),
+         format_value(rom_iskeyitem(rom, item_id)));
 }
 
-void guarddrink(std::string name, u8 itemId, bool expectedGuardDrink) {
+void guarddrink(std::string name, u8 item_id, bool expected_guard_drink) {
     TEST(name,
-         formatValue(expectedGuardDrink),
-         formatValue(rom_isguarddrink(rom, itemId)));
+         format_value(expected_guard_drink),
+         format_value(rom_isguarddrink(rom, item_id)));
 }
 
-void itemprice(std::string name, u8 itemId, int expectedPrice) {
-    int gotPrice = rom_getitemprice(rom, itemId);
+void itemprice(std::string name, u8 item_id, int expected_price) {
+    int got_price = rom_getitemprice(rom, item_id);
     TEST(name,
-         formatValue(expectedPrice),
-         formatValue(gotPrice));
+         format_value(expected_price),
+         format_value(got_price));
 }
 
-void itemTests() {
-    itemrawname("masterball", 0x01, rom.game == Yellow ? 0x145b7 : 0x1472b);
-    itemrawname("oaksparcel", 0x46, rom.game == Yellow ? 0x1486d : 0x149e1);
-    itemrawname("hex00", 0x00,      rom.game == Yellow ? 0x17789 : 0x17b22);
-    itemrawname("hex62", 0x62,      rom.game == Yellow ? 0x1491e : 0x14a92);
-    itemrawname("hex9e", 0x9e,      rom.game == Yellow ? 0x16460 : 0x16701);
-    itemrawname("hexc3", 0xc3,      rom.game == Yellow ? 0x16d38 : 0x16fb6);
+void item_tests() {
+    itemrawname("masterball", 0x01, rom.game == YELLOW ? 0x145b7 : 0x1472b);
+    itemrawname("oaksparcel", 0x46, rom.game == YELLOW ? 0x1486d : 0x149e1);
+    itemrawname("hex00", 0x00,      rom.game == YELLOW ? 0x17789 : 0x17b22);
+    itemrawname("hex62", 0x62,      rom.game == YELLOW ? 0x1491e : 0x14a92);
+    itemrawname("hex9e", 0x9e,      rom.game == YELLOW ? 0x16460 : 0x16701);
+    itemrawname("hexc3", 0xc3,      rom.game == YELLOW ? 0x16d38 : 0x16fb6);
     itemrawname("hm01", 0xc4);
     itemrawname("hm05", 0xc8);
     itemrawname("tm01", 0xc9);
@@ -64,8 +64,8 @@ void itemTests() {
     
     itempointer("masterball", 0x01, "ItemUseBall");
     itempointer("surfboard", 0x07, "ItemUseSurfboard");
-    itempointer("hex00", 0x00, rom.game == Yellow ? 0xfe06 : 0x01d1);
-    itempointer("hex5d", 0x5d, rom.game == Yellow ? 0x04fe : 0xd163);
+    itempointer("hex00", 0x00, rom.game == YELLOW ? 0xfe06 : 0x01d1);
+    itempointer("hex5d", 0x5d, rom.game == YELLOW ? 0x04fe : 0xd163);
     itempointer("hm01", 0xc4, "ItemUseTMHM");
     itempointer("tm55", 0xff, "ItemUseTMHM");
     
@@ -95,5 +95,5 @@ void itemTests() {
     itemprice("tm02", 0xca, 2000);
     itemprice("tm03", 0xcb, 2000);
     itemprice("tm50", 0xfa, 2000);
-    itemprice("tm55", 0xff, rom.game == Yellow ? 4000 : 0);
+    itemprice("tm55", 0xff, rom.game == YELLOW ? 4000 : 0);
 }

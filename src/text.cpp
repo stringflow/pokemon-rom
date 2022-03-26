@@ -41,42 +41,42 @@ static std::map<u8, std::string> charmap = []() {
     return result;
 } ();
 
-std::string decodeString(u8 *data, int maxLength = 65535) {
+std::string decode_string(u8 *data, int max_length = 65535) {
     std::string decoded = "";
     u8 character;
-    for(int i = 0; (character = data[i]) != 0x50 && i < maxLength; i++) {
+    for(int i = 0; (character = data[i]) != 0x50 && i < max_length; i++) {
         decoded.append(charmap[character]);
     }
     return decoded;
 }
 
-std::string hexString(u8 value) {
+std::string hex_string(u8 value) {
     char buffer[5];
     sprintf(buffer, "hex%02x", value);
     return std::string(buffer);
 }
 
-bool isMachine(u8 index) {
+bool is_machine(u8 index) {
     return index >= HM01;
 }
 
-bool isTechnicalMachine(u8 index) {
+bool is_technical_machine(u8 index) {
     return index >= TM01;
 }
 
-bool isHiddenMachine(u8 index) {
-    return isMachine(index) && !isTechnicalMachine(index);
+bool is_hidden_machine(u8 index) {
+    return is_machine(index) && !is_technical_machine(index);
 }
 
-u8 encodeDigit(int digit) {
+u8 encode_digit(int digit) {
     return 0xf6 + digit;
 }
 
 // NOTE(stringflow): BUG: This applies to all names instead of just items
-MachineName getMachineName(u8 index) {
+MachineName get_machine_name(u8 index) {
     MachineName result = {};
     u8 offset = 0;
-    if(isTechnicalMachine(index+1)) {
+    if(is_technical_machine(index+1)) {
         // NOTE(stringflow): the machine is a technical machine
         result.prefix[0] = 0x93; // T
         offset = TM01;
@@ -92,40 +92,40 @@ MachineName getMachineName(u8 index) {
     return result;
 }
 
-int getListElementOffset(u8 *listStart, u8 index) {
-    u8 *list = listStart;
+int get_list_element_offset(u8 *list_start, u8 index) {
+    u8 *list = list_start;
     for(int i = 0; i < index; i++) {
-        list += findByte(list, 0x50) + 1;
+        list += find_byte(list, 0x50) + 1;
     }
-    return list - listStart;
+    return list - list_start;
 }
 
 // TODO(stringflow): should this write into a char * directly?
-std::string getListElement(u8 *listStart, u8 index) {
-    if(isMachine(index+1)) {
+std::string get_list_element(u8 *list_start, u8 index) {
+    if(is_machine(index+1)) {
         char name[MACHINE_NAME_SIZE];
-        MachineName machineName = getMachineName(index);
-        sprintf(name, "%s%02d", decodeString(machineName.prefix, 2).c_str(), machineName.number);
+        MachineName machine_name = get_machine_name(index);
+        sprintf(name, "%s%02d", decode_string(machine_name.prefix, 2).c_str(), machine_name.number);
         return std::string(name);
     } else {
-        int offset = getListElementOffset(listStart, index);
-        return decodeString(listStart + offset);
+        int offset = get_list_element_offset(list_start, index);
+        return decode_string(list_start + offset);
     }
 }
 
-int getListElement(u8 *dest, u8 *listStart, u8 index) {
-    if(isMachine(index+1)) {
+int get_list_element(u8 *dest, u8 *list_start, u8 index) {
+    if(is_machine(index+1)) {
         if(dest) {
-            MachineName machineName = getMachineName(index);
-            memcpy(dest, machineName.prefix, 2);
-            dest[2] = encodeDigit(machineName.number / 10);
-            dest[3] = encodeDigit(machineName.number % 10);
+            MachineName machine_name = get_machine_name(index);
+            memcpy(dest, machine_name.prefix, 2);
+            dest[2] = encode_digit(machine_name.number / 10);
+            dest[3] = encode_digit(machine_name.number % 10);
             dest[4] = 0x50;
         }
         return MACHINE_NAME_SIZE;
     } else {
-        u8 *list = listStart + getListElementOffset(listStart, index);
-        int size = findByte(list, 0x50) + 1;
+        u8 *list = list_start + get_list_element_offset(list_start, index);
+        int size = find_byte(list, 0x50) + 1;
         if(dest) memcpy(dest, list, size);
         return size;
     }

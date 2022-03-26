@@ -9,13 +9,13 @@ struct BaseStats {
     u8 special;
     u8 type1;
     u8 type2;
-    u8 catchRate;
-    u8 baseExp;
-    u8 frontPicDimensions;
-    u16 frontPic;
-    u16 backPic;
-    u8 baseMoves[4];
-    u8 growthRate;
+    u8 catch_rate;
+    u8 base_exp;
+    u8 front_pic_dimensions;
+    u16 front_pic;
+    u16 back_pic;
+    u8 base_moves[4];
+    u8 growth_rate;
     u8 learnset[7];
     u8 padding; // NOTE(stringflow): unused
 };
@@ -29,12 +29,12 @@ struct DexEntry {
 };
 
 struct CryData {
-    u8 baseCry;
+    u8 base_cry;
     u8 pitch;
     u8 length;
 };
 
-bool isGlitchMon(u8 species) {
+bool is_glitch_mon(u8 species) {
     return species < 0x01 || species > 0xbe;
 }
 
@@ -46,7 +46,7 @@ DLLEXPORT u8 rom_getpokedexnumber(ROM& rom, u8 species) {
 // Writes the pokemon's basestats.
 DLLEXPORT void rom_getmonbasestats(ROM &rom, u8 species, BaseStats *stats) {
     u8 *data;
-    if(species == 0x15 && rom.game != Yellow) {
+    if(species == 0x15 && rom.game != YELLOW) {
         data = rom["MewBaseStats"];
     } else {
         u8 pokedex = rom_getpokedexnumber(rom, species - 1) - 1;
@@ -54,14 +54,14 @@ DLLEXPORT void rom_getmonbasestats(ROM &rom, u8 species, BaseStats *stats) {
     }
     
     if(species == 0xb6) {
-        stats->frontPicDimensions = 0x66;
-        stats->frontPic = (u16) rom.symbols["FossilKabutopsPic"];
+        stats->front_pic_dimensions = 0x66;
+        stats->front_pic = (u16) rom.symbols["FossilKabutopsPic"];
     } else if(species == 0xb7) {
-        stats->frontPicDimensions = 0x66;
-        stats->frontPic = (u16) rom.symbols["GhostPic"];
+        stats->front_pic_dimensions = 0x66;
+        stats->front_pic = (u16) rom.symbols["GhostPic"];
     } else if(species == 0xb8) {
-        stats->frontPicDimensions = 0x77;
-        stats->frontPic = (u16) rom.symbols["FossilAerodactylPic"];
+        stats->front_pic_dimensions = 0x77;
+        stats->front_pic = (u16) rom.symbols["FossilAerodactylPic"];
     } else {
         memcpy(stats, data, sizeof(BaseStats));
     }
@@ -80,14 +80,14 @@ DLLEXPORT int rom_getmonrawname(ROM& rom, u8 species, u8 *dest) {
 // terminator is not written. For glitched pokemon, a string of format 'hexXX' is outputted
 // instead with the exception of MISSINGNO.
 DLLEXPORT void rom_getmonname(ROM& rom, u8 species, char *dest) {
-    u8 rawnameBuffer[MAX_SPECIES_NAME_LENGTH];
-    rom_getmonrawname(rom, species, rawnameBuffer);
+    u8 rawname_buffer[MAX_SPECIES_NAME_LENGTH];
+    rom_getmonrawname(rom, species, rawname_buffer);
     
     std::string name;
-    if(isGlitchMon(species)) {
-        name = hexString(species);
+    if(is_glitch_mon(species)) {
+        name = hex_string(species);
     } else {
-        name = decodeString(rawnameBuffer, MAX_SPECIES_NAME_LENGTH);
+        name = decode_string(rawname_buffer, MAX_SPECIES_NAME_LENGTH);
     }
     
     strcpy(dest, name.c_str());
@@ -95,28 +95,28 @@ DLLEXPORT void rom_getmonname(ROM& rom, u8 species, char *dest) {
 
 // Returns the icon a pokemon will use in the party screen.
 DLLEXPORT u8 rom_getmonicon(ROM& rom, u8 species) {
-    return nybbleArray(rom["MonPartyData"], rom_getpokedexnumber(rom, species - 1) - 1);
+    return nybble_array(rom["MonPartyData"], rom_getpokedexnumber(rom, species - 1) - 1);
 }
 
 // Writes the dex entry of a pokemon. Requesting the dex entry of glitched pokemon
 // will currently result in undefined behavior.
-DLLEXPORT void rom_getmondexentry(ROM& rom, u8 species, DexEntry *dexentry) {
-    int dexPointer = 0x100000 | ((u16 *) rom["PokedexEntryPointers"])[(u8) (species - 1)];
-    u8 *data = rom[dexPointer];
-    std::string speciesType = decodeString(data);
-    strcpy(dexentry->type, speciesType.c_str());
-    data += findByte(data, 0x50) + 1;
-    dexentry->feet = *data++;
-    dexentry->inches = *data++;
-    dexentry->weight = *data++;
-    dexentry->weight += *data++ << 8;
-    dexentry->weight /= 10.0f;
+DLLEXPORT void rom_getmondexentry(ROM& rom, u8 species, DexEntry *dex_entry) {
+    int dex_pointer = 0x100000 | ((u16 *) rom["PokedexEntryPointers"])[(u8) (species - 1)];
+    u8 *data = rom[dex_pointer];
+    std::string species_type = decode_string(data);
+    strcpy(dex_entry->type, species_type.c_str());
+    data += find_byte(data, 0x50) + 1;
+    dex_entry->feet = *data++;
+    dex_entry->inches = *data++;
+    dex_entry->weight = *data++;
+    dex_entry->weight += *data++ << 8;
+    dex_entry->weight /= 10.0f;
     data++; // NOTE(stringflow): skip over text_far opcode
-    int descriptionPointer = *data++ + 1; // NOTE(stringflow): skip over text opcode
-    descriptionPointer |= *data++ << 8;
-    descriptionPointer |= *data++ << 16;
-    std::string description = decodeString(rom[descriptionPointer]);
-    strcpy(dexentry->description, description.c_str());
+    int description_pointer = *data++ + 1; // NOTE(stringflow): skip over text opcode
+    description_pointer |= *data++ << 8;
+    description_pointer |= *data++ << 16;
+    std::string description = decode_string(rom[description_pointer]);
+    strcpy(dex_entry->description, description.c_str());
 }
 
 // Writes the pokemon's cry data. (base cry, pitch, length)
@@ -152,8 +152,8 @@ DLLEXPORT void rom_getmonsprite(ROM& rom, u8 species, bool front, bool flip, u8 
         bank = 0xd;
     }
     
-    int picPointer = bank << 16 | (front ? stats.frontPic : stats.backPic);
-    picDecompress(rom[picPointer], stats.frontPicDimensions, dest, front, flip);
+    int pic_pointer = bank << 16 | (front ? stats.front_pic : stats.back_pic);
+    pic_decompress(rom[pic_pointer], stats.front_pic_dimensions, dest, front, flip);
 }
 
 // Writes raw pcm data of a pokemons cry. The routine will output mono signed 16-bit samples
@@ -168,14 +168,15 @@ DLLEXPORT int rom_getmoncry(ROM& rom, u8 species, bool resample, s16 *dest) {
     rom_getmoncrydata(rom, species, &crydata);
     
     u8 pitch = crydata.pitch;
-    s8 timeStretch = crydata.length - 0x80;
+    s8 time_stretch = crydata.length - 0x80;
     
-    u8 *cryheader = rom["SFX_Cry00_1"] + crydata.baseCry * 9;
-    u8 *pulse1Data = rom[0x20000 | *((u16 *) (cryheader + 1))];
-    u8 *pulse2Data = rom[0x20000 | *((u16 *) (cryheader + 4))];
-    u8 *noiseData  = rom[0x20000 | *((u16 *) (cryheader + 7))];
+    u8 *cry_header = rom["SFX_Cry00_1"] + crydata.base_cry * 9;
+    u8 *pulse1_data = rom[0x20000 | *((u16 *) (cry_header + 1))];
+    u8 *pulse2_data = rom[0x20000 | *((u16 *) (cry_header + 4))];
+    u8 *noise_data  = rom[0x20000 | *((u16 *) (cry_header + 7))];
     
-    return synthesizeCry(pulse1Data, pulse2Data, noiseData, pitch, timeStretch, resample, dest);
+    return synthesize_cry(pulse1_data, pulse2_data, noise_data, pitch, time_stretch,
+                          resample, dest);
 }
 
 // Writes raw pcm data of a pokemon yellow pikachu sound clip. The routine will write mono
@@ -184,12 +185,12 @@ DLLEXPORT int rom_getmoncry(ROM& rom, u8 species, bool resample, s16 *dest) {
 // If you do not know the number of samples in the sound, pass zero as the destination and
 // use the return value to tell you how big the buffer should be.
 // Pikachu sound indices range from 0 to 41 (inclusive).
-DLLEXPORT int rom_getpikasound(ROM& rom, u8 soundId, bool resample, s16 *dest) {
-    if(rom.game != Yellow) return 0;
-    if(soundId > 41) return 0;
+DLLEXPORT int rom_getpikasound(ROM& rom, u8 sound_id, bool resample, s16 *dest) {
+    if(rom.game != YELLOW) return 0;
+    if(sound_id > 41) return 0;
     
-    u8 *table = rom["PikachuCriesPointerTable"] + soundId * 3;
+    u8 *table = rom["PikachuCriesPointerTable"] + sound_id * 3;
     u8 bank = *table++;
     u16 address = *((u16 *) table);
-    return synthesizePikaSound(rom[bank << 16 | address], resample, dest);
+    return synthesize_pika_sound(rom[bank << 16 | address], resample, dest);
 }

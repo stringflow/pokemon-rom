@@ -1,27 +1,27 @@
-void typeName(std::string name, u8 typeId, std::string expectedName) {
-    nameTest(__FUNCTION__, name, typeId, expectedName, rom_gettypename);
+void typeName(std::string name, u8 type_id, std::string expected_name) {
+    name_test(__FUNCTION__, name, type_id, expected_name, rom_gettypename);
 }
 
-void typespecial(std::string name, u8 typeId, bool expectedSpecial) {
+void typespecial(std::string name, u8 type_id, bool expected_special) {
     TEST(name,
-         formatValue(expectedSpecial),
-         formatValue(rom_istypespecial(typeId)));
+         format_value(expected_special),
+         format_value(rom_istypespecial(type_id)));
 }
 
-void typematchup(std::string name, u8 attacking, u8 defending, f32 expectedEffectiveness) {
+void typematchup(std::string name, u8 attacking, u8 defending, f32 expected_effectiveness) {
     TEST(name,
-         std::to_string(expectedEffectiveness),
+         std::to_string(expected_effectiveness),
          std::to_string(rom_geteffectiveness(rom, attacking, defending)));
 }
 
-void typematchup(std::string name, u8 attacking, u8 defending1, u8 defending2, f32 expectedEffectiveness) {
+void typematchup(std::string name, u8 attacking, u8 defending1, u8 defending2, f32 expected_effectiveness) {
     TEST(name,
-         std::to_string(expectedEffectiveness),
+         std::to_string(expected_effectiveness),
          std::to_string(rom_geteffectiveness(rom, attacking, defending1) * 
                         rom_geteffectiveness(rom, attacking, defending2)));
 }
 
-void typeTests() {
+void type_tests() {
     typeName("normal", 0x00, "NORMAL");
     typeName("bird", 0x06, "BIRD");
     typeName("fire", 0x14, "FIRE");

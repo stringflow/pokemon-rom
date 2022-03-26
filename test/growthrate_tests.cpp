@@ -1,10 +1,10 @@
-void growthrate(std::string name, u8 growthRateId, int level, int expectedXp) {
+void growthrate(std::string name, u8 growth_rate_id, int level, int expected_xp) {
     TEST(name,
-         formatValue(expectedXp),
-         formatValue(rom_calcxp(rom, growthRateId, level)));
+         format_value(expected_xp),
+         format_value(rom_calcxp(rom, growth_rate_id, level)));
 }
 
-void growthrateTests() {
+void growthrate_tests() {
     growthrate("mediumfast",           0, 50, 125000);
     growthrate("mediumslow",           3, 50, 117360);
     growthrate("mediumslow-underflow", 3,  1, 16777162);

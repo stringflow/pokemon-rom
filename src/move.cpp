@@ -24,14 +24,11 @@ DLLEXPORT int rom_getmoverawname(ROM& rom, u8 move_id, u8 *dest) {
 // Writes the move's decoded name to a 13 size character buffer. The $50 terminator
 // is not written. For glitched items, a string of format 'hexXX' is outputted instead.
 DLLEXPORT void rom_getmovename(ROM& rom, u8 move_id, char *dest) {
-    std::string name;
     if(move_id == 0 || (move_id > 0xa5 && !is_machine(move_id))) {
-        name = hex_string(move_id);
+        hex_string(dest, move_id);
     } else {
-        name = get_list_element(rom["MoveNames"], move_id-1);
+        get_list_element(dest, rom["MoveNames"], move_id-1);
     }
-    
-    strcpy(dest, name.c_str());
 }
 
 // Returns the id of the move that the TM teaches. 

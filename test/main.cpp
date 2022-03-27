@@ -7,7 +7,7 @@ typedef void (*NameFn)(ROM&, u8, char*);
 static ROM rom;
 static int num_passed = 0;
 static int num_failed = 0;
-static std::string global_test_prefix = "";
+static char global_test_prefix[50];
 
 u32 crc32(u8 *data, int count) {
     u32 crc = 0xffffffff;
@@ -41,7 +41,7 @@ std::string format_value(int value) {
 
 #define TEST(name, expected, got) test_internal(std::string(__FUNCTION__) + "-" + name, expected, got);
 void test_internal(std::string name, std::string expected, std::string got) {
-    printf("%s%s ... ", global_test_prefix.c_str(), name.c_str());
+    printf("%s%s ... ", global_test_prefix, name.c_str());
     if(expected == got) {
         printf("OK\n");
         num_passed++;
@@ -67,12 +67,15 @@ void rawname_test(const char *prefix, std::string name, u8 id, RawNameFn rawname
     u8 rawname[size];
     rawnamefn(rom, id, rawname);
     
+    char rawname_decoded[size];
+    decode_string(rawname_decoded, rawname);
+    
     char expected_name[13];
     namefn(rom, id, expected_name);
     
     test_internal(std::string(prefix) + "-" + name,
                   std::string(expected_name), 
-                  decode_string(rawname));
+                  rawname_decoded);
 }
 
 void name_test(const char *prefix, std::string name, u8 id, std::string expected_name, NameFn fn) {
@@ -104,18 +107,19 @@ int main() {
     for(int i = 0; i < ARRAY_LENGTH(games); i++) {
         int game = games[i];
         
-        std::string game_name = "";
+        const char *game_name = "";
         switch(game) {
             case RED: game_name = "red"; break;
             case BLUE: game_name = "blue"; break;
             case YELLOW: game_name = "yellow"; break;
         };
-        global_test_prefix = game_name + "-";
+        strcpy(global_test_prefix, game_name);
+        strcat(global_test_prefix, "-");
         
         char romfile[256];
         char symfile[256];
-        sprintf(romfile, "..\\test\\roms\\poke%s.gbc", game_name.c_str());
-        sprintf(symfile, "..\\test\\symbols\\poke%s.sym", game_name.c_str());
+        sprintf(romfile, "..\\test\\roms\\poke%s.gbc", game_name);
+        sprintf(symfile, "..\\test\\symbols\\poke%s.sym", game_name);
         RomLoadResult res = rom_load(*romptr, romfile, symfile);
         if(res == OK) {
             rom = *romptr;
@@ -128,11 +132,11 @@ int main() {
             map_tests();
             tileset_tests();
         } else if(res == IO_ERROR) {
-            printf("Unable to test %s: IO Error.\n", game_name.c_str());
+            printf("Unable to test %s: IO Error.\n", game_name);
         } else if(res == BAD_FORMAT) {
-            printf("Unable to test %s: bad format.\n", game_name.c_str());
+            printf("Unable to test %s: bad format.\n", game_name);
         } else if(res == UNSUPPORTED_GAME) {
-            printf("Unable to test %s: unsupported game.\n", game_name.c_str());
+            printf("Unable to test %s: unsupported game.\n", game_name);
         }
     }
     

@@ -17,13 +17,11 @@ DLLEXPORT int rom_gettrainerclassrawname(ROM &rom, u8 trainer_class_id, u8 *dest
 // The $50 terminator is not written. For glitched trainer classes, a string of format
 // 'hexXX' is outputted instead.
 DLLEXPORT void rom_gettrainerclassname(ROM& rom, u8 trainer_class_id, char *dest) {
-    std::string name;
     if(trainer_class_id <= OPP_ID_OFFSET || trainer_class_id > 0xf7) {
-        name = hex_string(trainer_class_id);
+        hex_string(dest, trainer_class_id);
     } else {
-        name = get_list_element(rom["TrainerNames"], trainer_class_id - OPP_ID_OFFSET-1);
+        get_list_element(dest, rom["TrainerNames"], trainer_class_id - OPP_ID_OFFSET-1);
     }
-    strcpy(dest, name.c_str());
 }
 
 // Writes trainer class' roster. The roster is stored in sequential order

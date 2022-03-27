@@ -9,14 +9,12 @@ DLLEXPORT int rom_getitemrawname(ROM& rom, u8 item_id, u8 *dest) {
 // Writes the item's decoded name to a 13 size character buffer. The $50 terminator
 // is not written. For glitched items, a string of format 'hexXX' is outputted instead.
 DLLEXPORT void rom_getitemname(ROM& rom, u8 item_id, char *dest) {
-    std::string name;
     // NOTE(stringflow): check for glitch items
     if(item_id < 0x01 || (item_id > 0x61 && !is_machine(item_id))) {
-        name = hex_string(item_id);
+        hex_string(dest, item_id);
     } else {
-        name = get_list_element(rom["ItemNames"], item_id-1);
+        get_list_element(dest, rom["ItemNames"], item_id-1);
     }
-    strcpy(dest, name.c_str());
 }
 
 // Returns a 16-bit pointer that is jumped to when the item is used.

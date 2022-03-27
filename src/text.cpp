@@ -1,59 +1,73 @@
 constexpr u8 HM01 = 0xc4;
 constexpr u8 TM01 = 0xc9;
-constexpr int MACHINE_NAME_SIZE = 5;
+constexpr int MACHINE_NAME_SIZE = 5; 
 
 struct MachineName {
     u8 prefix[2];
     u8 number;
 };
 
-static std::map<u8, std::string> charmap = []() {
-    const std::string charset = 
-        "*|#|#|#|#|#|#|#|#|#|#|#|#|#|#|#|"
-        "#|#|#|#|#|#|#|#|#|#|#|#|#|#|#|#|"
-        "#|#|#|#|#|#|#|#|#|#|#|#|#|#|#|#|"
-        "#|#|#|#|#|#|#|#|#|#|#|#|#|#|#|#|"
-        "#|#|#|#|#|#|#|#|#| |PKMN|_|_|#| |#|"
-        "*|_|<player>|<rival>|POKé|_|……|_|_|<target>|<attacker>|PC|TM|TRAINER|ROCKET|.|"
-        "#|#|#|#|#|#|#|#|#|#|#|#|#|#|#|#|"
-        "#|#|#|#|#|#|#|#|#|#|#|#|#|#|#| |"
-        "A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|"
-        "Q|R|S|T|U|V|W|X|Y|Z|(|)|:|;|[|]|"
-        "a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|"
-        "q|r|s|t|u|v|w|x|y|z|é|'d|'l|'s|'t|'v|"
-        " | | | | | | | | | | | | | | | |"
-        " | | | | | | | | | | | | | | | |"
-        "'|PK|MN|-|'r|'m|?|!|.|ァ|ゥ|ェ|>|>|V|♂|"
-        "$|x|.|/|,|♀|0|1|2|3|4|5|6|7|8|9";
+struct Charmap {
+    char charset[256*4];
+    char *map[256];
+};
+
+static Charmap charmap = []() {
+    const char delimiter = '|';
+    Charmap result;
     
-    constexpr char delimiter = '|';
+    strcpy(result.charset,
+           "#|#|#|#|#|#|#|#|#|#|#|#|#|#|#| |"
+           "*|#|#|#|#|#|#|#|#|#|#|#|#|#|#|#|"
+           "#|#|#|#|#|#|#|#|#|#|#|#|#|#|#|#|"
+           "#|#|#|#|#|#|#|#|#|#|#|#|#|#|#|#|"
+           "#|#|#|#|#|#|#|#|#|#|#|#|#|#|#|#|"
+           "#|#|#|#|#|#|#|#|#| |PKMN|_|_|#| |#|"
+           "*|_|<player>|<rival>|POKé|_|……|_|_|<target>|<attacker>|PC|TM|TRAINER|ROCKET|.|"
+           "#|#|#|#|#|#|#|#|#|#|#|#|#|#|#|#|"
+           "#|#|#|#|#|#|#|#|#|#|#|#|#|#|#| |"
+           "A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|"
+           "Q|R|S|T|U|V|W|X|Y|Z|(|)|:|;|[|]|"
+           "a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|"
+           "q|r|s|t|u|v|w|x|y|z|é|'d|'l|'s|'t|'v|"
+           " | | | | | | | | | | | | | | | |"
+           " | | | | | | | | | | | | | | | |"
+           "'|PK|MN|-|'r|'m|?|!|.|ァ|ゥ|ェ|>|>|V|♂|"
+           "$|x|.|/|,|♀|0|1|2|3|4|5|6|7|8|9");
     
-    std::map<u8, std::string> result;
+    int delimiter_count = 0;
+    for(const char *at = result.charset; *at; at++) {
+        if(*at == delimiter) {
+            delimiter_count++;
+        }
+    }
     
-    u64 beginning;
-    int end = 0;
-    u8 value = 0;
-    while((beginning = charset.find_first_not_of(delimiter, end)) != std::string::npos) {
-        end = charset.find(delimiter, beginning);
-        result[value++] = charset.substr(beginning, end - beginning);
+    int current_byte = 255 - delimiter_count;
+    char *at = result.charset;
+    while(*at) {
+        char *end = at;
+        while(*end && *end != delimiter) end++;
+        *end = 0;
+        result.map[current_byte++] = at;
+        at = end+1;
     }
     
     return result;
 } ();
 
-std::string decode_string(u8 *data, int max_length = 65535) {
-    std::string decoded = "";
+void decode_string(char *dest, u8 *data, int max_length = 65535) {
     u8 character;
     for(int i = 0; (character = data[i]) != 0x50 && i < max_length; i++) {
-        decoded.append(charmap[character]);
+        for(char *at = charmap.map[character]; *at; at++) {
+            *dest++ = *at;
+        }
     }
-    return decoded;
+    
+    *dest = 0;
 }
 
-std::string hex_string(u8 value) {
-    char buffer[5];
-    sprintf(buffer, "hex%02x", value);
-    return std::string(buffer);
+void hex_string(char *dest, u8 value) {
+    sprintf(dest, "hex%02x", value);
 }
 
 bool is_machine(u8 index) {
@@ -101,15 +115,15 @@ int get_list_element_offset(u8 *list_start, u8 index) {
 }
 
 // TODO(stringflow): should this write into a char * directly?
-std::string get_list_element(u8 *list_start, u8 index) {
+void get_list_element(char *dest, u8 *list_start, u8 index) {
     if(is_machine(index+1)) {
-        char name[MACHINE_NAME_SIZE];
         MachineName machine_name = get_machine_name(index);
-        sprintf(name, "%s%02d", decode_string(machine_name.prefix, 2).c_str(), machine_name.number);
-        return std::string(name);
+        char prefix[ARRAY_LENGTH(machine_name.prefix)];
+        decode_string(prefix, machine_name.prefix, ARRAY_LENGTH(machine_name.prefix));
+        sprintf(dest, "%s%02d", prefix, machine_name.number);
     } else {
         int offset = get_list_element_offset(list_start, index);
-        return decode_string(list_start + offset);
+        decode_string(dest, list_start + offset);
     }
 }
 

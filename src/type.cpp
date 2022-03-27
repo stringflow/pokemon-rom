@@ -7,14 +7,12 @@ struct TypeEffectiveness {
 // Writes the item's decoded name to a 13 size character buffer. The $50 terminator
 // is not written. For glitched types, a string of format 'hexXX' is outputted instead.
 DLLEXPORT void rom_gettypename(ROM& rom, u8 type_id, char *dest) {
-    std::string name;
     if(type_id > 0x1a) {
-        name = hex_string(type_id);
+        hex_string(dest, type_id);
     } else {
         u16 address = ((u16 *) rom["TypeNames"])[type_id];
-        name = decode_string(rom[0x90000 | address]);
+        decode_string(dest, rom[0x90000 | address]);
     }
-    strcpy(dest, name.c_str());
 }
 
 // Returns whether the type is a special type or a physical type.

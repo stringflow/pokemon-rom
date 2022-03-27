@@ -83,14 +83,11 @@ DLLEXPORT void rom_getmonname(ROM& rom, u8 species, char *dest) {
     u8 rawname_buffer[MAX_SPECIES_NAME_LENGTH];
     rom_getmonrawname(rom, species, rawname_buffer);
     
-    std::string name;
     if(is_glitch_mon(species)) {
-        name = hex_string(species);
+        hex_string(dest, species);
     } else {
-        name = decode_string(rawname_buffer, MAX_SPECIES_NAME_LENGTH);
+        decode_string(dest, rawname_buffer, MAX_SPECIES_NAME_LENGTH);
     }
-    
-    strcpy(dest, name.c_str());
 }
 
 // Returns the icon a pokemon will use in the party screen.
@@ -103,8 +100,7 @@ DLLEXPORT u8 rom_getmonicon(ROM& rom, u8 species) {
 DLLEXPORT void rom_getmondexentry(ROM& rom, u8 species, DexEntry *dex_entry) {
     int dex_pointer = 0x100000 | ((u16 *) rom["PokedexEntryPointers"])[(u8) (species - 1)];
     u8 *data = rom[dex_pointer];
-    std::string species_type = decode_string(data);
-    strcpy(dex_entry->type, species_type.c_str());
+    decode_string(dex_entry->type, data);
     data += find_byte(data, 0x50) + 1;
     dex_entry->feet = *data++;
     dex_entry->inches = *data++;
@@ -115,8 +111,7 @@ DLLEXPORT void rom_getmondexentry(ROM& rom, u8 species, DexEntry *dex_entry) {
     int description_pointer = *data++ + 1; // NOTE(stringflow): skip over text opcode
     description_pointer |= *data++ << 8;
     description_pointer |= *data++ << 16;
-    std::string description = decode_string(rom[description_pointer]);
-    strcpy(dex_entry->description, description.c_str());
+    decode_string(dex_entry->description, rom[description_pointer]);
 }
 
 // Writes the pokemon's cry data. (base cry, pitch, length)

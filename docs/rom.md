@@ -6,5 +6,5 @@ Creates a ROM reference.
 `(ROM *rom) -> void`  
 Frees a ROM reference.
 ### rom_load
-`(ROM& rom, const char *romfile, const char *symbolsfile) -> RomLoadResult`  
-Loads the ROM image and processes the symbols file. Returns 0 on success, a positive number on error.
+`(ROM& rom, const char *romfile) -> RomLoadResult`  
+Loads the ROM image. Returns 0 on success, a positive number on error.

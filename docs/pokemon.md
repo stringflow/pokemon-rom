@@ -12,7 +12,7 @@ Any species <$bf is currently supported.
 `(ROM& rom, u8 species, CryData *cry) -> void`  
 Writes the pokemon's cry data. (base cry, pitch, length)
 ### rom_getmondexentry
-`(ROM& rom, u8 species, DexEntry *dexentry) -> void`  
+`(ROM& rom, u8 species, DexEntry *dex_entry) -> void`  
 Writes the dex entry of a pokemon. Requesting the dex entry of glitched pokemon will currently result in undefined behavior.
 ### rom_getmonicon
 `(ROM& rom, u8 species) -> u8`  
@@ -30,7 +30,7 @@ The front flag controlls whether the front sprite or the back sprite is written.
 The sprite can be vertically flipped with the flip flag.  
 If the pokemons pic pointer points outside of the ROM address space, garbage data may be written by this routine. If the bounding box of the sprite has a width of zero, no data will be written since loading those sprites in-game crashes the game.
 ### rom_getpikasound
-`(ROM& rom, u8 soundId, bool resample, s16 *dest) -> int`  
+`(ROM& rom, u8 sound_id, bool resample, s16 *dest) -> int`  
 Writes raw pcm data of a pokemon yellow pikachu sound clip. The routine will write mono signed 16-bit samples at 23301hz, or upsampled to 48000hz if the flag is set.  
 Returns the number of samples in the sound.  
 If you do not know the number of samples in the sound, pass zero as the destination and use the return value to tell you how big the buffer should be.  

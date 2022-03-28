@@ -117,10 +117,8 @@ int main() {
         strcat(global_test_prefix, "-");
         
         char romfile[256];
-        char symfile[256];
         sprintf(romfile, "..\\test\\roms\\poke%s.gbc", game_name);
-        sprintf(symfile, "..\\test\\symbols\\poke%s.sym", game_name);
-        RomLoadResult res = rom_load(*romptr, romfile, symfile);
+        RomLoadResult res = rom_load(*romptr, romfile);
         if(res == OK) {
             rom = *romptr;
             growthrate_tests();

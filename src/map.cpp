@@ -303,7 +303,7 @@ DLLEXPORT u8 rom_getlastmap(ROM& rom, u8 map_id, u8 warp_index) {
 // the second byte is equal to the species id.
 DLLEXPORT void rom_getmapwilddata(ROM& rom, u8 map_id, WildData *dest) {
     int pointer = 0x30000 | ((u16 *) rom["WildDataPointers"])[map_id];
-    if(pointer == rom.symbols["NothingWildMons"]) {
+    if(pointer == rom.symbol_lookup("NothingWildMons")) {
         dest->encounter_rate = 0;
         memset(dest->encounter_slots, 0, 20);
     } else {

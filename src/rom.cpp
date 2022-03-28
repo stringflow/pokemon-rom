@@ -19,6 +19,14 @@ typedef int64_t s64;
 typedef float f32;
 typedef double f64;
 
+typedef int(*SymbolLookup)(const char *); 
+int symbol_lookup_red(const char *label);
+int symbol_lookup_blue(const char *label);
+int symbol_lookup_yellow(const char *label);
+int symbol_lookup_gold(const char *label);
+int symbol_lookup_silver(const char *label);
+int symbol_lookup_crystal(const char *label);
+
 #define DLLEXPORT extern "C" __declspec(dllexport)
 
 enum Game {
@@ -40,11 +48,11 @@ enum RomLoadResult {
 
 struct ROM {
     u8 *contents;
-    std::map<std::string, int> symbols;
+    SymbolLookup symbol_lookup;
     Game game;
     
-    u8* operator[](std::string label) {
-        return contents + symbols[label];
+    u8* operator[](const char *label) {
+        return contents + symbol_lookup(label);
     }
     
     u8* operator[](int offset) {
@@ -103,43 +111,32 @@ RomLoadResult read_rom_file(u8 *rom, const char *filename) {
     return OK;
 }
 
-RomLoadResult read_symbols_file(std::map<std::string, int> *symbols, const char *filename) {
-    FILE *file = fopen(filename, "r");
-    if(!file) return IO_ERROR;
-    
-    symbols->clear();
-    
-    int lineLength = 256;
-    char line[lineLength];
-    
-    int bank;
-    int addr;
-    char label[256];
-    while(fgets(line, lineLength, file)) {
-        if(line[0] == ';') continue;
-        
-        if(sscanf(line, "%02x:%04x %s", &bank, &addr, label) == 3) {
-            symbols->insert(std::make_pair(std::string(label), bank << 16 | addr));
-        } else {
-            return BAD_FORMAT;
-        }
-    }
-    
-    return OK;
-}
-
-RomLoadResult parse_game_title(Game *game, u8 *rom) {
+RomLoadResult parse_game_title(ROM& rom) {
     char title[0x11];
-    memcpy(title, rom + 0x134, 0x10);
+    memcpy(title, rom.contents + 0x134, 0x10);
     title[title[0xf] & 0x80 ? 0xf : 0x10] = '\0';
     
-    if(strcmp(title, "POKEMON RED") == 0) *game = RED;
-    else if(strcmp(title, "POKEMON BLUE") == 0) *game = BLUE;
-    else if(strcmp(title, "POKEMON YELLOW") == 0) *game = YELLOW;
-    else if(strcmp(title, "POKEMON GOLD") == 0) *game = GOLD;
-    else if(strcmp(title, "POKEMON SILVER") == 0) *game = SILVER;
-    else if(strcmp(title, "POKEMON CRYSTAL") == 0) *game = CRYSTAL;
-    else return UNSUPPORTED_GAME;
+    if(strcmp(title, "POKEMON RED") == 0) {
+        rom.game = RED;
+        rom.symbol_lookup = &symbol_lookup_red;
+    } else if(strcmp(title, "POKEMON BLUE") == 0) {
+        rom.game = BLUE;
+        rom.symbol_lookup = &symbol_lookup_blue;
+    } else if(strcmp(title, "POKEMON YELLOW") == 0) {
+        rom.game = YELLOW;
+        rom.symbol_lookup = &symbol_lookup_yellow;
+    } else if(strcmp(title, "POKEMON GOLD") == 0) {
+        rom.game = GOLD;
+        rom.symbol_lookup = &symbol_lookup_gold;
+    } else if(strcmp(title, "POKEMON SILVER") == 0) {
+        rom.game = SILVER;
+        rom.symbol_lookup = &symbol_lookup_silver;
+    } else if(strcmp(title, "POKEMON CRYSTAL") == 0) {
+        rom.game = CRYSTAL;
+        rom.symbol_lookup = &symbol_lookup_crystal;
+    } else {
+        return UNSUPPORTED_GAME;
+    }
     
     return OK;
 }
@@ -148,18 +145,15 @@ RomLoadResult parse_game_title(Game *game, u8 *rom) {
 DLLEXPORT ROM* rom_create() {
     ROM *rom = new ROM();
     rom->contents = new u8[ROM_SIZE];
-    rom->symbols = std::map<std::string, int>();
     rom->game = NONE;
     return rom;
 }
 
-// Loads the ROM image and processes the symbols file. Returns 0 on success, a positive
-// number on error.
-DLLEXPORT RomLoadResult rom_load(ROM& rom, const char *romfile, const char *symbolsfile) {
+// Loads the ROM image. Returns 0 on success, a positive number on error.
+DLLEXPORT RomLoadResult rom_load(ROM& rom, const char *romfile) {
     RomLoadResult result = OK;
     if((result = read_rom_file(rom.contents, romfile)) != OK) return result;
-    if((result = read_symbols_file(&rom.symbols, symbolsfile)) != OK) return result;
-    if((result = parse_game_title(&rom.game, rom.contents)) != OK) return result;
+    if((result = parse_game_title(rom)) != OK) return result;
     return result;
 }
 

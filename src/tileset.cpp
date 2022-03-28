@@ -31,7 +31,7 @@ DLLEXPORT void rom_gettileset(ROM& rom, u8 tileset_id, Tileset *tileset) {
 // Used for simulate differences in elevation.
 DLLEXPORT bool rom_istilepaircollision(ROM& rom, u8 tileset_id, u8 tile1, u8 tile2,
                                        bool water) {
-    std::string label = water ? "TilePairCollisionsWater" : "TilePairCollisionsLand";
+    const char *label = water ? "TilePairCollisionsWater" : "TilePairCollisionsLand";
     for(TilePairCollision *pair = (TilePairCollision *) rom[label];
         pair->tileset != 0xff;
         pair++) {

@@ -55,13 +55,13 @@ DLLEXPORT void rom_getmonbasestats(ROM &rom, u8 species, BaseStats *stats) {
     
     if(species == 0xb6) {
         stats->front_pic_dimensions = 0x66;
-        stats->front_pic = (u16) rom.symbols["FossilKabutopsPic"];
+        stats->front_pic = (u16) rom.symbol_lookup("FossilKabutopsPic");
     } else if(species == 0xb7) {
         stats->front_pic_dimensions = 0x66;
-        stats->front_pic = (u16) rom.symbols["GhostPic"];
+        stats->front_pic = (u16) rom.symbol_lookup("GhostPic");
     } else if(species == 0xb8) {
         stats->front_pic_dimensions = 0x77;
-        stats->front_pic = (u16) rom.symbols["FossilAerodactylPic"];
+        stats->front_pic = (u16) rom.symbol_lookup("FossilAerodactylPic");
     } else {
         memcpy(stats, data, sizeof(BaseStats));
     }

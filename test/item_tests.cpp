@@ -18,7 +18,7 @@ void itempointer(std::string name, u8 item_id, u16 expected_pointer) {
 }
 
 void itempointer(std::string name, u8 item_id, std::string expected_pointer_name) {
-    itempointer(name, item_id, (u16) rom.symbols[expected_pointer_name]);
+    itempointer(name, item_id, (u16) rom.symbol_lookup(expected_pointer_name.c_str()));
 }
 
 void keyitem(std::string name, u8 item_id, bool expected_key_item) {

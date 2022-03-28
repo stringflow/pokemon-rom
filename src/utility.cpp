@@ -3,7 +3,7 @@
 #define MAX(a,b) (a > b ? a : b)
 #define MAX3(a,b,c) (MAX(a, MAX(b,c)))
 #define CLAMP(value, lower, upper) (MAX(lower, MIN(value, upper)))
-#define ARRAY_LENGTH(array) ((sizeof(array) / sizeof(array[0])))
+#define ARRAY_SIZE(array) ((sizeof(array) / sizeof(array[0])))
 
 int find_byte(u8 *data, u8 value, int step_size = 1) {
     int count;

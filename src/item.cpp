@@ -20,7 +20,7 @@ DLLEXPORT void rom_getitemname(ROM& rom, u8 item_id, char *dest) {
 // Returns a 16-bit pointer that is jumped to when the item is used.
 DLLEXPORT u16 rom_getitemexecutionpointer(ROM& rom, u8 item_id) {
     // TODO(stringflow): maybe return the bank? bank 3 for $4000..$7fff addresses
-    if(is_machine(item_id)) return rom.symbols["ItemUseTMHM"];
+    if(is_machine(item_id)) return rom.symbol_lookup("ItemUseTMHM");
     u8 list_index = item_id - 1;
     u8 list_offset = list_index * 2;
     return *((u16 *) (rom["ItemUsePtrTable"] + list_offset));

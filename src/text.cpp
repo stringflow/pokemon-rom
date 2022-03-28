@@ -118,8 +118,8 @@ int get_list_element_offset(u8 *list_start, u8 index) {
 void get_list_element(char *dest, u8 *list_start, u8 index) {
     if(is_machine(index+1)) {
         MachineName machine_name = get_machine_name(index);
-        char prefix[ARRAY_LENGTH(machine_name.prefix)];
-        decode_string(prefix, machine_name.prefix, ARRAY_LENGTH(machine_name.prefix));
+        char prefix[ARRAY_SIZE(machine_name.prefix)];
+        decode_string(prefix, machine_name.prefix, ARRAY_SIZE(machine_name.prefix));
         sprintf(dest, "%s%02d", prefix, machine_name.number);
     } else {
         int offset = get_list_element_offset(list_start, index);
